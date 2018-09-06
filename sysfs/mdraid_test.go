@@ -29,14 +29,15 @@ func TestNewMdraidStat(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := []MDStat{
-		{"md0", "active", 4, 0, "raid0", "1.2", 0, "", 524288, 0},
-		{"md1", "clean", 2, 0, "raid1", "1.2", 0, "idle", 0, 0},
-		{"md10", "clean", 4, 0, "raid10", "1.2", 0, "idle", 524288, 0},
-		{"md4", "clean", 4, 0, "raid4", "1.2", 0, "idle", 524288, 0},
-		{"md5", "clean", 4, 0, "raid5", "1.2", 0, "idle", 524288, 0.9920517758931722},
-		{"md6", "clean", 4, 0, "raid6", "1.2", 0, "idle", 524288, 0},
-		{"md99", "clean", 4, 0, "linear", "1.2", 0, "", 0, 0},
+	expected := []MdraidStat{
+		// device, level, array state, metadata ver, total disks, chunk size, degraded disks, sync action, sync completed, mismatch count
+		{"md0", "raid0", "active", "1.2", 4, 524288, 0, "", 0, 0},
+		{"md1", "raid1", "clean", "1.2", 2, 0, 0, "idle", 0, 0},
+		{"md10", "raid10", "clean", "1.2", 4, 524288, 0, "idle", 0, 0},
+		{"md4", "raid4", "clean", "1.2", 4, 524288, 0, "idle", 0, 0},
+		{"md5", "raid5", "clean", "1.2", 4, 524288, 0, "idle", 0.9920517758931722, 0},
+		{"md6", "raid6", "clean", "1.2", 4, 524288, 0, "idle", 0, 0},
+		{"md99", "linear", "clean", "1.2", 4, 0, 0, "", 0, 0},
 	}
 
 	if !reflect.DeepEqual(expected, stats) {

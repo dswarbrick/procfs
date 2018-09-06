@@ -20,48 +20,32 @@ import (
 	"strings"
 )
 
-// MDStat holds info parsed from various files in the /sys/block/md*/md directory.
-type MDStat struct {
-	// Name of the device.
-	Device string
-	// State of the array.
-	ArrayState string
-	// Total number of disks in the array.
-	TotalDisks uint64
-	// Number of degraded disks in the array.
-	DegradedDisks uint64
-	// RAID level.
-	Level string
-	// mdraid metadata version.
-	MetadataVersion string
-	// Number of RAID mismatches.
-	MismatchCount uint64
-	// The current sync action
-	SyncAction string
+// MdraidStat holds info parsed from various files in the /sys/block/md*/md directory.
+type MdraidStat struct {
+	Device          string // Kernel device name of array.
+	Level           string // mdraid level.
+	ArrayState      string // State of the array.
+	MetadataVersion string // mdraid metadata version.
+	TotalDisks      uint64 // Total number of disks in the array.
+	ChunkSize       uint64 // Chunk size.
 
-	ChunkSize     uint64
-	SyncCompleted float64
-
-	/*
-		// Number of active disks.
-		DisksActive int64
-		// Number of blocks the device holds.
-		BlocksTotal int64
-		// Number of blocks on the device that are in sync.
-		BlocksSynced int64
-	*/
+	// The following items are only valid for raid1, 4, 5, 6 and 10.
+	DegradedDisks uint64  // Number of degraded disks in the array.
+	SyncAction    string  // Current sync action.
+	SyncCompleted float64 // Fraction (0.0 - 1.0) representing the completion status of current sync operation.
+	MismatchCount uint64  // Number of mdraid mismatches.
 }
 
-func (fs FS) NewMdraidStat() ([]MDStat, error) {
+func (fs FS) NewMdraidStat() ([]MdraidStat, error) {
 	matches, err := filepath.Glob(fs.Path("block/md*/md"))
 	if err != nil {
 		return nil, err
 	}
 
-	stats := make([]MDStat, 0, len(matches))
+	stats := make([]MdraidStat, 0, len(matches))
 
 	for _, m := range matches {
-		md := MDStat{Device: filepath.Base(filepath.Dir(m))}
+		md := MdraidStat{Device: filepath.Base(filepath.Dir(m))}
 		path := fs.Path("block", md.Device, "md")
 
 		if val, err := sysReadFileString(path + "/level"); err == nil {
